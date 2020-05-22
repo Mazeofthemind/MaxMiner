@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "MaxMiner"
+version = "0.1.0"
+description = ""
+authors = ["Mazeofthemind"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/Mazeofthemind/MaxMiner"
+repository = "https://github.com/mazeofthemind/MaxMiner"
+documentation = "https://github.com/mazeofthemind/MaxMiner"
+
+keywords = ["packaging", "dependency", "infer", "pyproject.toml"]
+
+#classifiers = [
+#    "Topic :: Software Development"
+#]
+packages = [
+    { include = "PyARMViz" },
+]
+
+[tool.poetry.dependencies]
+numpy = "^"
+
+[build-system]
+requires = [
+	"numpy",
+	"poetry"
+]
+build-backend = "poetry.masonry.api"
