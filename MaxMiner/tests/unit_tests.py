@@ -59,7 +59,24 @@ mafia_paper_out_data_low_support = [
     [1,2,3,4]
 ]
 
+#Recreates the data and settings of the demo video at .5 minsup
+charm_video_in_data = [
+    [1, 2, 4, 5],
+    [2, 3, 5],
+    [1, 2, 4, 5],
+    [1, 2, 3, 5],
+    [1, 2, 3, 4, 5],
+    [2, 3, 4]  
+]
 
+charm_video_out_data = [
+    [1, 4, 5, 2],
+    [1, 5, 2],
+    [3, 5, 2],
+    [3, 2],
+    [4, 2],
+    [5, 2],
+]
 
 class TestCalc(unittest.TestCase):
     def setUp(self):
@@ -68,13 +85,25 @@ class TestCalc(unittest.TestCase):
     
     def test_encoder(self):
         transaction_encoder = generate_transactional_encoder_from_collection(mafia_paper_in_data)
+        encoded_transactions, encoder_key = transaction_encoder.encode_horizontally_from_collection_frequent(mafia_paper_in_data, 0.05)
 
-        '''
+
+    '''
+    def test_mafia(self):
+        transaction_encoder = generate_transactional_encoder_from_collection(mafia_paper_in_data)
+
         encoded_transactions, encoder_key = transaction_encoder.encode_horizontally_from_collection_frequent(mafia_paper_in_data, 0.2)
         maximal_itemsets = MaxMiner.MAFIA_on_encoded_collection(encoded_transactions, transaction_encoder, 0.2)
         logging.info("Maximal itemsets uncovered {}".format(maximal_itemsets))
-        '''
+
         encoded_transactions, encoder_key = transaction_encoder.encode_horizontally_from_collection_frequent(mafia_paper_in_data, 0.05)
         maximal_itemsets = MaxMiner.MAFIA_on_encoded_collection(encoded_transactions, transaction_encoder, 0.05)
         logging.info("Maximal itemsets uncovered {}".format(maximal_itemsets))
+    
+    '''
+    def test_charm(self):
+        transaction_encoder = generate_transactional_encoder_from_collection(charm_video_in_data)
+        encoded_transactions, encoder_key = transaction_encoder.encode_horizontally_from_collection_frequent(charm_video_in_data, 0.5)
+        closed_itemsets = MaxMiner.CHARM_on_encoded_collection(encoded_transactions, transaction_encoder, 0.5)
 
+        

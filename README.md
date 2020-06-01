@@ -111,9 +111,20 @@ Closed and Maximal algorithms are generally designed to find closed/maximal sets
 computation as possible and use them to disqualify other sets without having to compute their
 support
 
-As Closed Itemsets are a superset of Maximal Itemsets, Closed algorithsm naturally discover Maximal
-Itemsets but do not necessarily distinguish them in output. As such Maximal algorithms are
+As Closed Itemsets are a superset of Maximal Itemsets, Closed Algorithms naturally discover Maximal
+Itemsets but do not necessarily distinguish them. As such Maximal algorithms are
 generally faster and narrower in output due to higher specificity
+
+### CHARM -
+
+The [CHARM Algorithm](https://pdfs.semanticscholar.org/fc59/bb528815efc84c2a08a3ad09f9ced8cc7508.pdf)
+is a cousin of MAFIA (also implemented here) designed to find Closed Itemsets.
+
+CHARM is a depth first algorithm that actively pursues instances where subsets-supersets have identical
+supports, allowing us to eliminate the former in favor of the latter.
+
+
+[Demo Video](https://www.youtube.com/watch?v=XTj53ctgFFk/)
 
 ### MAFIA - 
 

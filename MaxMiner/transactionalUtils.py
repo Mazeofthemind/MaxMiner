@@ -22,8 +22,10 @@ class TransactionalEncoder:
 		self.value_supports = unique_value_supports
 		
 		self.value_encoder_mapping = {}
+		self.value_decoder_mapping = {}
 		for count, value in enumerate(unique_value_supports):
 			self.value_encoder_mapping[value] = count
+			self.value_decoder_mapping[count] = value
 		
 		self.number_of_transactions = number_of_transactions
 	
