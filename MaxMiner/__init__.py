@@ -156,7 +156,7 @@ def CHARM_on_encoded_collection(encoded_transactions, transaction_encoder, min_s
     logging.debug(transaction_encoder.value_encoder_mapping)
     logging.debug(transaction_encoder.value_supports)
     
-    closed_itemsets = []
+    closed_itemsets = {}
 
         
     #Sorting the root items to be considered an order of ascending support as described in the paper
@@ -200,15 +200,26 @@ def CHARM_on_encoded_collection(encoded_transactions, transaction_encoder, min_s
                         closed_itemsets, min_support_ratio, total_transaction_count)
         
         #Once we have iterated through all potentially superceding variables, add the compilation to closed itemsets
+        build_up_itemset = frozenset(build_up_itemset)
         logging.info("Inserting closed itemset {}".format(build_up_itemset))
-        closed_itemsets.append(build_up_itemset)
+        if len(build_up_itemset) not in closed_itemsets:
+            closed_itemsets[len(build_up_itemset)] = {}
+        closed_itemset_support = transaction_encoder.value_supports[transaction_encoder.value_decoder_mapping[root_item]]
+            
+        closed_itemsets[len(build_up_itemset)][build_up_itemset] = closed_itemset_support
 
     #Decode the discovered itemsets back to the original values
-    translated_closed_itemsets = []
-    for closed_itemset in closed_itemsets:
-        decoded_itemset = list(map(lambda item: decoder_map[item], closed_itemset))
-        decoded_itemset_tuple = frozenset(decoded_itemset)
-        translated_closed_itemsets.append(decoded_itemset_tuple)
+    translated_closed_itemsets = {}
+    for itemset_size in closed_itemsets:
+        
+        if itemset_size not in translated_closed_itemsets:
+            translated_closed_itemsets[itemset_size] = {}
+        
+        for closed_itemset in closed_itemsets[itemset_size]:
+            support = closed_itemsets[itemset_size][closed_itemset]
+            decoded_itemset = list(map(lambda item: decoder_map[item], closed_itemset))
+            decoded_itemset = frozenset(decoded_itemset)
+            translated_closed_itemsets[itemset_size][decoded_itemset] = support
     logging.info("Discovered closed itemsets {}".format(translated_closed_itemsets))
     
     return translated_closed_itemsets
@@ -316,8 +327,11 @@ def _CHARM_recursive_candidate_assessor(head_item_set: set, encoded_transactions
                 
                 
         
+        build_up_itemset = frozenset(build_up_itemset)
         logging.info("Inserting closed itemset {}".format(build_up_itemset))
-        closed_itemsets.append(build_up_itemset)
+        if len(build_up_itemset) not in closed_itemsets:
+            closed_itemsets[len(build_up_itemset)] = {}
+        closed_itemsets[len(build_up_itemset)][build_up_itemset] = head_support
         
     else:
         logging.debug("{} is infrequent".format(head_item_set))

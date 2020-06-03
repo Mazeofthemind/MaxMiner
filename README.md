@@ -1,17 +1,23 @@
 # MaxMiner
-Optimized, CPU/GPU parallelizable implementation of Maximum Frequent Itemset Mining
+Optimized Python implementation of Maximum and Closed Frequent Itemset Mining Algorithms
 
-## Maximal Itemsets
-A commonly misunderstood aspect of [Association Rule Mining](https://en.wikipedia.org/wiki/Association_rule_learning)(ARM)
-is that Association Rules (AR) are the only useful product.
+## Closed/Maximal Itemsets
 
+[Association Rule Mining](https://en.wikipedia.org/wiki/Association_rule_learning)(ARM)
+like Apriori and FP-Growth are a common [Data Mining]() technique which extracts interesting patterns from categorical
+data.
 
-the intermediate product of  required to make the 
-are not valuable in a standalone fashion
+Lesser known, is that much of these algorithms is actually devoted to Itemset Mining (IM) and that
+the result of this intermediate step can be insightful unto itself
 
-In fact, AR production requires an intermediate step of Itemset Mining (IM) which can produce
-useful products, especially when refined to specific classes such as
+The reason the IM results are not used more frequently in their raw form is that they produce too many results
+in typical databases.
+
 [Maximal and CLosed Itemsets](http://eacharya.inflibnet.ac.in/data-server/eacharya-documents/53e0c6cbe413016f23443704_INFIEP_33/85/LM/33-85-LM-V1-S1__maximal_and_closed_itemsets.pdf)
+Are two ways of producing a more compact, potentially useful subset, especially from data with high cardinality
+and large numbers of items per transaction.
+
+Algorithms optimized for this purpose, can produce highly efficient summaries of large amounts
 
 These Itemsets can provide helpful summaries of large portions of high cardinality data, in a
 much more performance friendly manner then traditional, bottom-up Frequent Itemset (FI) techniques
