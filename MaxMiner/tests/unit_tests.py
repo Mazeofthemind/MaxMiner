@@ -70,18 +70,54 @@ charm_video_in_data = [
 ]
 
 charm_video_out_data = [
-    [1, 4, 5, 2],
-    [1, 5, 2],
-    [3, 5, 2],
-    [3, 2],
-    [4, 2],
-    [5, 2],
+    {1, 4, 5, 2},
+    {1, 5, 2},
+    {3, 5, 2},
+    {3, 2},
+    {4, 2},
+    {5, 2},
 ]
+
+#MinSup 50%
+charm_paper_in_data = [
+    ['A', 'C', 'T', 'W'],
+    ['C', 'D', 'W'],
+    ['A', 'C', 'T', 'W'],
+    ['A', 'C', 'D', 'W'],
+    ['A', 'C', 'D', 'T', 'W'],
+    ['C', 'T', 'D'],
+
+]
+
+charm_paper_out_data = [
+    {'C'},
+    {'C', 'W'},
+    {'C', 'D'},
+    {'C', 'T'},
+    {'A', 'C', 'W'},
+    {'C', 'D', 'W'},
+    {'A', 'C', 'T' ,'W'}
+]
+
+
+def setTester(algorithm_out_sets, expected_out_sets):
+    '''
+        Helper function for testing the entire output set of an IM algorithm
+    '''
+    
+    valid_flag = True
+    for expected_set in expected_out_sets:
+        if expected_set not in algorithm_out_sets:
+            valid_flag = False
+    
+    return valid_flag
+    
+    
 
 class TestCalc(unittest.TestCase):
     def setUp(self):
         basic_format = "%(asctime)-15s %(message)s"
-        logging.basicConfig(level=logging.DEBUG, format=basic_format)
+        logging.basicConfig(level=logging.INFO, format=basic_format)
     
     def test_encoder(self):
         transaction_encoder = generate_transactional_encoder_from_collection(mafia_paper_in_data)
@@ -101,9 +137,17 @@ class TestCalc(unittest.TestCase):
         logging.info("Maximal itemsets uncovered {}".format(maximal_itemsets))
     
     '''
-    def test_charm(self):
+    def test_video_charm(self):
         transaction_encoder = generate_transactional_encoder_from_collection(charm_video_in_data)
         encoded_transactions, encoder_key = transaction_encoder.encode_horizontally_from_collection_frequent(charm_video_in_data, 0.5)
         closed_itemsets = MaxMiner.CHARM_on_encoded_collection(encoded_transactions, transaction_encoder, 0.5)
+        
+        self.assertTrue(setTester(closed_itemsets, charm_video_out_data))
 
         
+    def test_paper_charm(self):
+        transaction_encoder = generate_transactional_encoder_from_collection(charm_paper_in_data)
+        encoded_transactions, encoder_key = transaction_encoder.encode_horizontally_from_collection_frequent(charm_paper_in_data, 0.5)
+        closed_itemsets = MaxMiner.CHARM_on_encoded_collection(encoded_transactions, transaction_encoder, 0.5)
+        
+        self.assertTrue(setTester(closed_itemsets, charm_paper_out_data))

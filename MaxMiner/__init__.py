@@ -168,12 +168,12 @@ def CHARM_on_encoded_collection(encoded_transactions, transaction_encoder, min_s
 
 
     #Iterate through the root elements and compare them to all other root elements
-    for root_item in sorted_root_candidate_items:
+    for root_index, root_item in enumerate(sorted_root_candidate_items):
         
         #Create a holding variable to hold the superceded version of the root
         build_up_itemset = {root_item}
         
-        for secondary_item in sorted_root_candidate_items:
+        for secondary_item in sorted_root_candidate_items[root_index:]:
             if secondary_item != root_item:
                 
                 #Isolate root and secondary item transactions 
@@ -200,17 +200,18 @@ def CHARM_on_encoded_collection(encoded_transactions, transaction_encoder, min_s
                         closed_itemsets, min_support_ratio, total_transaction_count)
         
         #Once we have iterated through all potentially superceding variables, add the compilation to closed itemsets
+        logging.info("Inserting closed itemset {}".format(build_up_itemset))
         closed_itemsets.append(build_up_itemset)
 
-    #Debug for the finished itemset
+    #Decode the discovered itemsets back to the original values
     translated_closed_itemsets = []
     for closed_itemset in closed_itemsets:
         decoded_itemset = list(map(lambda item: decoder_map[item], closed_itemset))
-        decoded_itemset_tuple = tuple(decoded_itemset)
+        decoded_itemset_tuple = frozenset(decoded_itemset)
         translated_closed_itemsets.append(decoded_itemset_tuple)
     logging.info("Discovered closed itemsets {}".format(translated_closed_itemsets))
-    logging.info("Discovered closed itemsets {} deduped".format(set(translated_closed_itemsets)))
-                
+    
+    return translated_closed_itemsets
 
 def _CHARM_subsumption_test(root_transactions, secondary_transactions):
     '''
@@ -255,12 +256,15 @@ def _CHARM_subsumption_test(root_transactions, secondary_transactions):
 def _CHARM_recursive_candidate_assessor(head_item_set: set, encoded_transactions, 
     sorted_root_candidate_items, closed_itemsets, min_support_ratio: float, total_transaction_count: int):
     '''
+        This function is run recursively each time we assess a prospective frequent itemset and
+        has the potential 
+        
+        
     
     '''
     
     logging.debug("Assessing potential frequent item set {}".format(head_item_set))
     head_item_list = list(head_item_set)
-    #head_transactions = encoded_transactions[:,head_item_list]
     
     head_transactions = encoded_transactions[np.sum(encoded_transactions[:,head_item_list], axis=1) == len(head_item_list)]
     head_column_transactions = encoded_transactions[:,head_item_list]
@@ -269,22 +273,32 @@ def _CHARM_recursive_candidate_assessor(head_item_set: set, encoded_transactions
     head_support = head_transactions.shape[0]
     logging.info("Head Item Set {} Support {}".format(head_item_set, head_support/total_transaction_count))
     
-    #If Head Support is above the MinSupp ratio, continue to evaluate the node
+    #If Head Support is above the MinSupp ratio, continue to evaluate the head
     if head_support/total_transaction_count >= min_support_ratio:
         logging.debug("{} is frequent".format(head_item_set))
         
+        #Narrow down the tail items to assess for subsumption or frequent itemset candidates
         potential_tails = np.bitwise_or.reduce(head_transactions, axis=0) 
-        
         potential_tail_indices = []
         for index, column_digest_value in enumerate(potential_tails):
             if column_digest_value == 1:
                 potential_tail_indices.append(index)
                 
-        #Provides a support ordered set of potential tail items filtered from the master list
-        reduced_sorted_root_candidate_items = list(filter(lambda index: index in potential_tail_indices, sorted_root_candidate_items))
+                
+        #Figure out how far down the sorted roots we've traveled based on the last item in the head set
+        last_index = 0
+        for head_item in head_item_set:
+            head_item_index = sorted_root_candidate_items.index(head_item)
+            if  head_item_index > last_index:
+                last_index = head_item_index
+                
+        #Retrieves an optimized list of candidate tail items for assessment
+        #The two optimizations are sorting by ascending support, and removing items before the highest support item in the head set
+        reduced_root_items = sorted_root_candidate_items[last_index + 1:]
+        reduced_sorted_root_candidate_items = list(filter(lambda index: index in potential_tail_indices, reduced_root_items))
         
+        #Iterate through the tail candidates, test for subsumption (if yes
         build_up_itemset = head_item_set.copy()
-        
         for tail_item in reduced_sorted_root_candidate_items:
             if tail_item not in head_item_set:
                 tail_column_transactions = encoded_transactions[:,tail_item]
@@ -302,7 +316,7 @@ def _CHARM_recursive_candidate_assessor(head_item_set: set, encoded_transactions
                 
                 
         
-        logging.debug("Inserting closed itemset {}".format(build_up_itemset))
+        logging.info("Inserting closed itemset {}".format(build_up_itemset))
         closed_itemsets.append(build_up_itemset)
         
     else:
